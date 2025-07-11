@@ -65,4 +65,13 @@ class ProductService(
             ?: throw NoSuchElementException("Brand(id: ${productEntity.brandId}) not found.")
         return Product.from(productEntity, brandEntity)
     }
+
+    @Transactional(readOnly = true)
+    fun getHighestPricedProductByCategory(category: String): Product {
+        val productEntity = productRepository.findFirstByCategoryOrderByPriceDesc(category)
+            ?: throw NoSuchElementException("Max. price product(category: $category) not found.")
+        val brandEntity = brandRepository.findByIdOrNull(productEntity.brandId)
+            ?: throw NoSuchElementException("Brand(id: ${productEntity.brandId}) not found.")
+        return Product.from(productEntity, brandEntity)
+    }
 }

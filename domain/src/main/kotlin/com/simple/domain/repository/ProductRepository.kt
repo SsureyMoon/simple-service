@@ -8,4 +8,5 @@ import org.springframework.stereotype.Repository
 interface ProductRepository : CrudRepository<ProductEntity, Long> {
     fun deleteByBrandId(brandId: Long)
     fun findFirstByCategoryOrderByPriceAsc(category: String): ProductEntity?
+    fun findFirstByCategoryOrderByPriceDesc(category: String): ProductEntity?
 }

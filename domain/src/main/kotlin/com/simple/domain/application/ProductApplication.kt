@@ -10,10 +10,20 @@ import org.springframework.transaction.annotation.Transactional
 class ProductApplication(
     private val productService: ProductService,
 ) {
-    fun getLowestPricedProducts(): List<Product> {
-        return orderedCategories.map { category ->
-            productService.getLowestPricedProductByCategory(category)
+    fun getLowestPricedProducts(): LowestPricedProducts {
+        var totalPrice = 0L
+        val products = orderedCategories.map { category ->
+            val product = productService.getLowestPricedProductByCategory(category)
+            totalPrice += product.price
+            product
         }
+        return LowestPricedProducts(products = products, totalPrice = totalPrice)
+    }
+
+    fun getLowestHighestPricedProducts(category: String): LowestHighestPricedProducts {
+        val lowest = productService.getLowestPricedProductByCategory(category)
+        val highest = productService.getHighestPricedProductByCategory(category)
+        return LowestHighestPricedProducts(lowest = lowest, highest = highest)
     }
 
     companion object {
@@ -28,4 +38,14 @@ class ProductApplication(
             "액세서리",
         )
     }
+
+    data class LowestPricedProducts(
+        val products: List<Product>,
+        val totalPrice: Long,
+    )
+
+    data class LowestHighestPricedProducts(
+        val lowest: Product,
+        val highest: Product,
+    )
 }
