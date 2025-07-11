@@ -1,6 +1,6 @@
 package com.simple.api.dto
 
-import com.simple.domain.entity.BrandEntity
+import com.simple.domain.model.Brand
 import io.swagger.v3.oas.annotations.media.Schema
 
 @Schema(description = "브랜드 응답")
@@ -12,10 +12,10 @@ data class BrandResponse(
     val name: String,
 ) {
     companion object {
-        fun from(brandEntity: BrandEntity): BrandResponse {
+        fun from(brand: Brand): BrandResponse {
             return BrandResponse(
-                id = brandEntity.id!!,
-                name = brandEntity.name,
+                id = brand.id,
+                name = brand.name,
             )
         }
     }

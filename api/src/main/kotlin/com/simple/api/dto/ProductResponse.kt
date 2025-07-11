@@ -1,6 +1,6 @@
 package com.simple.api.dto
 
-import com.simple.domain.entity.ProductEntity
+import com.simple.domain.model.Product
 import io.swagger.v3.oas.annotations.media.Schema
 
 @Schema(description = "상품 응답")
@@ -8,8 +8,8 @@ data class ProductResponse(
     @Schema(description = "상품 ID", example = "1")
     val id: Long,
 
-    @Schema(description = "브랜드 ID", example = "1")
-    val brandId: Long,
+    @Schema(description = "브랜드", implementation = BrandResponse::class)
+    val brand: BrandResponse,
 
     @Schema(description = "카테고리", example = "상의")
     val category: String,
@@ -18,12 +18,12 @@ data class ProductResponse(
     val price: Long,
 ) {
     companion object {
-        fun from(productEntity: ProductEntity): ProductResponse {
+        fun from(product: Product): ProductResponse {
             return ProductResponse(
-                id = productEntity.id!!,
-                brandId = productEntity.brandId,
-                category = productEntity.category,
-                price = productEntity.price,
+                id = product.id,
+                brand = BrandResponse.from(product.brand),
+                category = product.category,
+                price = product.price,
             )
         }
     }

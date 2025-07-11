@@ -1,6 +1,7 @@
 package com.simple.domain.service
 
 import com.simple.domain.entity.BrandEntity
+import com.simple.domain.model.Brand
 import com.simple.domain.repository.BrandRepository
 import com.simple.domain.repository.ProductRepository
 import org.springframework.data.repository.findByIdOrNull
@@ -13,15 +14,21 @@ class BrandService(
     private val brandRepository: BrandRepository,
     private val productRepository: ProductRepository,
 ) {
-    fun create(name: String): BrandEntity {
+    fun get(id: Long): Brand {
+        val entity = brandRepository.findByIdOrNull(id)
+            ?: throw NoSuchElementException("Brand(id: $id) not found.")
+        return Brand.from(entity)
+    }
+
+    fun create(name: String): Brand {
         if (brandRepository.existsByName(name)) {
             throw IllegalArgumentException("Brand(name: $name) already exists.")
         }
         val brandEntity = BrandEntity(name = name)
-        return brandRepository.save(brandEntity)
+        return Brand.from(brandRepository.save(brandEntity))
     }
 
-    fun update(id: Long, name: String): BrandEntity {
+    fun update(id: Long, name: String): Brand {
         val brand = brandRepository.findByIdOrNull(id)
             ?: throw NoSuchElementException("Brand(id: $id) not found.")
 
@@ -30,7 +37,7 @@ class BrandService(
         }
 
         val updatedBrand = brand.copy(name = name)
-        return brandRepository.save(updatedBrand)
+        return Brand.from(brandRepository.save(updatedBrand))
     }
 
     fun delete(id: Long) {
