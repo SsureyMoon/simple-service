@@ -46,6 +46,7 @@ class ProductController(
         )
         @RequestBody request: ProductRequest,
     ): ResponseEntity<ProductResponse> {
+        request.validate()
         val product = productApplication.createProduct(
             brandId = request.brandId,
             category = request.category,
@@ -71,6 +72,7 @@ class ProductController(
         )
         @RequestBody request: ProductRequest,
     ): ResponseEntity<ProductResponse> {
+        request.validate()
         val product = productApplication.updateProduct(
             id = id,
             brandId = request.brandId,
