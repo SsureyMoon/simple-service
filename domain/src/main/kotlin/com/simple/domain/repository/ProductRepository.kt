@@ -10,4 +10,5 @@ interface ProductRepository : CrudRepository<ProductEntity, Long> {
     fun findFirstByCategoryOrderByPriceAsc(category: String): ProductEntity?
     fun findFirstByCategoryOrderByPriceDesc(category: String): ProductEntity?
     fun findFirstByBrandIdAndCategoryOrderByPriceAsc(brandId: Long, category: String): ProductEntity?
+    fun findByCategoryAndPrice(category: String, price: Long): List<ProductEntity>
 }

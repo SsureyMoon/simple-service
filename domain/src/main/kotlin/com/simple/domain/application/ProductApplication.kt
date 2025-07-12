@@ -33,9 +33,9 @@ class ProductApplication(
 
     @Transactional(readOnly = true)
     fun getLowestHighestPricedProducts(category: String): LowestHighestPricedProducts {
-        val lowest = productService.getLowestPricedProductByCategory(category)
-        val highest = productService.getHighestPricedProductByCategory(category)
-        return LowestHighestPricedProducts(lowest = lowest, highest = highest)
+        val lowestProducts = productService.getLowestPricedProductsByCategory(category)
+        val highestProducts = productService.getHighestPricedProductsByCategory(category)
+        return LowestHighestPricedProducts(lowestProducts = lowestProducts, highestProducts = highestProducts)
     }
 
     @Transactional(readOnly = true)
@@ -93,8 +93,8 @@ class ProductApplication(
     )
 
     data class LowestHighestPricedProducts(
-        val lowest: Product,
-        val highest: Product,
+        val lowestProducts: List<Product>,
+        val highestProducts: List<Product>,
     )
 
     data class BrandPackage(

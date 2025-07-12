@@ -1,5 +1,6 @@
 package com.simple.api.controller
 
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -8,6 +9,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice
 data class ErrorResponse(
     val message: String,
 )
+
+private val logger = LoggerFactory.getLogger(SimpleApiControllerAdvice::class.java)
 
 @RestControllerAdvice
 class SimpleApiControllerAdvice {
@@ -33,6 +36,7 @@ class SimpleApiControllerAdvice {
         val errorResponse = ErrorResponse(
             message = "Internal server error",
         )
+        logger.error(ex.message, ex)
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse)
     }
 }

@@ -68,12 +68,33 @@ class ProductService(
     }
 
     @Transactional(readOnly = true)
-    fun getHighestPricedProductByCategory(category: String): Product {
-        val productEntity = productRepository.findFirstByCategoryOrderByPriceDesc(category)
+    fun getLowestPricedProductsByCategory(category: String): List<Product> {
+        val firstProduct = productRepository.findFirstByCategoryOrderByPriceAsc(category)
+            ?: throw NoSuchElementException("Min. price product(category: $category) not found.")
+
+        val lowestPrice = firstProduct.price
+        val productsWithLowestPrice = productRepository.findByCategoryAndPrice(category, lowestPrice)
+
+        return productsWithLowestPrice.map { productEntity ->
+            val brandEntity = brandRepository.findByIdOrNull(productEntity.brandId)
+                ?: throw NoSuchElementException("Brand(id: ${productEntity.brandId}) not found.")
+            Product.from(productEntity, brandEntity)
+        }
+    }
+
+    @Transactional(readOnly = true)
+    fun getHighestPricedProductsByCategory(category: String): List<Product> {
+        val firstProduct = productRepository.findFirstByCategoryOrderByPriceDesc(category)
             ?: throw NoSuchElementException("Max. price product(category: $category) not found.")
-        val brandEntity = brandRepository.findByIdOrNull(productEntity.brandId)
-            ?: throw NoSuchElementException("Brand(id: ${productEntity.brandId}) not found.")
-        return Product.from(productEntity, brandEntity)
+
+        val highestPrice = firstProduct.price
+        val productsWithHighestPrice = productRepository.findByCategoryAndPrice(category, highestPrice)
+
+        return productsWithHighestPrice.map { productEntity ->
+            val brandEntity = brandRepository.findByIdOrNull(productEntity.brandId)
+                ?: throw NoSuchElementException("Brand(id: ${productEntity.brandId}) not found.")
+            Product.from(productEntity, brandEntity)
+        }
     }
 
     @Transactional(readOnly = true)

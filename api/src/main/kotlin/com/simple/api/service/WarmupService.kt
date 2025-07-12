@@ -38,6 +38,6 @@ class WarmupService(
             } catch (_: NoSuchElementException) {
                 null
             }
-        }.associate{ it }
+        }.associate { it }
     }
 }
