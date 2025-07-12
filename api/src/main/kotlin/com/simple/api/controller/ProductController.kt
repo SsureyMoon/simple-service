@@ -1,11 +1,11 @@
 package com.simple.api.controller
 
 import com.simple.api.dto.LowestHighestPricedProductsResponse
+import com.simple.api.dto.LowestPricedBrandPackageResponse
 import com.simple.api.dto.LowestPricedProductsResponse
 import com.simple.api.dto.ProductRequest
 import com.simple.api.dto.ProductResponse
 import com.simple.domain.application.ProductApplication
-import com.simple.domain.service.ProductService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
@@ -29,7 +29,6 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/api/products")
 class ProductController(
-    private val productService: ProductService,
     private val productApplication: ProductApplication,
 ) {
 
@@ -47,7 +46,7 @@ class ProductController(
         )
         @RequestBody request: ProductRequest,
     ): ResponseEntity<ProductResponse> {
-        val product = productService.create(
+        val product = productApplication.createProduct(
             brandId = request.brandId,
             category = request.category,
             price = request.price,
@@ -72,7 +71,7 @@ class ProductController(
         )
         @RequestBody request: ProductRequest,
     ): ResponseEntity<ProductResponse> {
-        val product = productService.update(
+        val product = productApplication.updateProduct(
             id = id,
             brandId = request.brandId,
             category = request.category,
@@ -91,7 +90,7 @@ class ProductController(
         @Parameter(description = "상품 ID", example = "1")
         @PathVariable id: Long,
     ): ResponseEntity<Void> {
-        productService.delete(id)
+        productApplication.deleteProduct(id)
         return ResponseEntity.noContent().build()
     }
 
@@ -124,6 +123,23 @@ class ProductController(
         return ResponseEntity.ok(
             LowestHighestPricedProductsResponse.from(
                 productApplication.getLowestHighestPricedProducts(category),
+            ),
+        )
+    }
+
+    @Operation(
+        summary = "최저가 브랜드 패키지",
+        description = "최저가 브랜드 패키지를 조회합니다.",
+    )
+    @ApiResponses(
+        ApiResponse(responseCode = "200", description = "조회 성공"),
+        ApiResponse(responseCode = "404", description = "최저가 브랜드 패키지를 찾을 수 없음"),
+    )
+    @GetMapping("/lowest-priced-brand-package")
+    fun getLowestPricedBrandPackage(): ResponseEntity<LowestPricedBrandPackageResponse> {
+        return ResponseEntity.ok(
+            LowestPricedBrandPackageResponse.from(
+                productApplication.getLowestTotalPricedBrandPackage(),
             ),
         )
     }

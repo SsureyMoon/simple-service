@@ -1,18 +1,29 @@
 package com.simple.domain.application
 
+import com.simple.domain.cache.BrandTotalPriceRankingCache
+import com.simple.domain.event.BrandDeletedEvent
+import com.simple.domain.event.BrandUpdatedEvent
+import com.simple.domain.model.Brand
 import com.simple.domain.model.Product
+import com.simple.domain.service.BrandService
 import com.simple.domain.service.ProductService
+import com.simple.domain.support.Constants
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-@Transactional(readOnly = true)
+@Transactional
 class ProductApplication(
+    private val brandService: BrandService,
     private val productService: ProductService,
+    private val brandTotalPriceRankingCache: BrandTotalPriceRankingCache,
+    private val eventPublisher: ApplicationEventPublisher,
 ) {
+    @Transactional(readOnly = true)
     fun getLowestPricedProducts(): LowestPricedProducts {
         var totalPrice = 0L
-        val products = orderedCategories.map { category ->
+        val products = Constants.orderedCategories.map { category ->
             val product = productService.getLowestPricedProductByCategory(category)
             totalPrice += product.price
             product
@@ -20,23 +31,60 @@ class ProductApplication(
         return LowestPricedProducts(products = products, totalPrice = totalPrice)
     }
 
+    @Transactional(readOnly = true)
     fun getLowestHighestPricedProducts(category: String): LowestHighestPricedProducts {
         val lowest = productService.getLowestPricedProductByCategory(category)
         val highest = productService.getHighestPricedProductByCategory(category)
         return LowestHighestPricedProducts(lowest = lowest, highest = highest)
     }
 
-    companion object {
-        private val orderedCategories = listOf(
-            "상의",
-            "아우터",
-            "바지",
-            "스니커즈",
-            "가방",
-            "모자",
-            "양말",
-            "액세서리",
+    @Transactional(readOnly = true)
+    fun getLowestTotalPricedBrandPackage(): BrandPackage {
+        val (brandId, totalPrice) = brandTotalPriceRankingCache.getLowestTotalPricedBrand()
+            ?: throw NoSuchElementException("No brand package found")
+        val brand = brandService.get(brandId)
+        val products = productService.getLowestPricedProductsByBrand(brandId)
+        return BrandPackage(
+            brand = brand,
+            totalPrice = totalPrice,
+            products = products,
         )
+    }
+
+    fun createProduct(brandId: Long, category: String, price: Long): Product {
+        val product = productService.create(brandId, category, price)
+        eventPublisher.publishEvent(BrandUpdatedEvent(product.brand.id))
+        return product
+    }
+
+    fun updateProduct(id: Long, brandId: Long, category: String, price: Long): Product {
+        // 기존 상품 정보 조회 (브랜드 정보 필요)
+        val oldProduct = productService.get(id)
+        val oldBrandId = oldProduct.brand.id
+
+        val updatedProduct = productService.update(id, brandId, category, price)
+
+        eventPublisher.publishEvent(BrandUpdatedEvent(oldBrandId))
+        if (oldBrandId != brandId) {
+            eventPublisher.publishEvent(BrandUpdatedEvent(brandId))
+        }
+
+        return updatedProduct
+    }
+
+    @Transactional
+    fun deleteProduct(id: Long) {
+        val product = productService.get(id)
+        val brandId = product.brand.id
+
+        productService.delete(id)
+        eventPublisher.publishEvent(BrandUpdatedEvent(brandId))
+    }
+
+    @Transactional
+    fun deleteBrand(brandId: Long) {
+        brandService.delete(brandId)
+        eventPublisher.publishEvent(BrandDeletedEvent(brandId))
     }
 
     data class LowestPricedProducts(
@@ -47,5 +95,11 @@ class ProductApplication(
     data class LowestHighestPricedProducts(
         val lowest: Product,
         val highest: Product,
+    )
+
+    data class BrandPackage(
+        val brand: Brand,
+        val totalPrice: Long,
+        val products: List<Product>,
     )
 }

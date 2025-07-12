@@ -14,10 +14,11 @@ class BrandService(
     private val brandRepository: BrandRepository,
     private val productRepository: ProductRepository,
 ) {
+    @Transactional(readOnly = true)
     fun get(id: Long): Brand {
-        val entity = brandRepository.findByIdOrNull(id)
+        val brandEntity = brandRepository.findByIdOrNull(id)
             ?: throw NoSuchElementException("Brand(id: $id) not found.")
-        return Brand.from(entity)
+        return Brand.from(brandEntity)
     }
 
     fun create(name: String): Brand {
@@ -50,5 +51,10 @@ class BrandService(
 
         // 브랜드를 삭제
         brandRepository.deleteById(id)
+    }
+
+    @Transactional(readOnly = true)
+    fun getAllBrands(): List<Brand> {
+        return brandRepository.findAll().map { Brand.from(it) }
     }
 }

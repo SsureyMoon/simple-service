@@ -2,6 +2,7 @@ package com.simple.api.controller
 
 import com.simple.api.dto.BrandRequest
 import com.simple.api.dto.BrandResponse
+import com.simple.domain.application.ProductApplication
 import com.simple.domain.service.BrandService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/brands")
 class BrandController(
     private val brandService: BrandService,
+    private val productApplication: ProductApplication,
 ) {
     @Operation(summary = "브랜드 생성", description = "새로운 브랜드를 생성합니다.")
     @ApiResponses(
@@ -75,7 +77,7 @@ class BrandController(
         @Parameter(description = "브랜드 ID", example = "1")
         @PathVariable id: Long,
     ): ResponseEntity<Void> {
-        brandService.delete(id)
+        productApplication.deleteBrand(id)
         return ResponseEntity.noContent().build()
     }
 }

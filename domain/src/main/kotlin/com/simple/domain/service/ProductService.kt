@@ -4,6 +4,7 @@ import com.simple.domain.entity.ProductEntity
 import com.simple.domain.model.Product
 import com.simple.domain.repository.BrandRepository
 import com.simple.domain.repository.ProductRepository
+import com.simple.domain.support.Constants
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -73,5 +74,16 @@ class ProductService(
         val brandEntity = brandRepository.findByIdOrNull(productEntity.brandId)
             ?: throw NoSuchElementException("Brand(id: ${productEntity.brandId}) not found.")
         return Product.from(productEntity, brandEntity)
+    }
+
+    @Transactional(readOnly = true)
+    fun getLowestPricedProductsByBrand(brandId: Long): List<Product> {
+        val brandEntity = brandRepository.findByIdOrNull(brandId)
+            ?: throw NoSuchElementException("Brand(id: $brandId) not found.")
+
+        return Constants.orderedCategories.mapNotNull { category ->
+            productRepository.findFirstByBrandIdAndCategoryOrderByPriceAsc(brandId, category)
+                ?.let { Product.from(it, brandEntity) }
+        }
     }
 }

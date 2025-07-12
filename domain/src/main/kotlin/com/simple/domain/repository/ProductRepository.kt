@@ -9,4 +9,5 @@ interface ProductRepository : CrudRepository<ProductEntity, Long> {
     fun deleteByBrandId(brandId: Long)
     fun findFirstByCategoryOrderByPriceAsc(category: String): ProductEntity?
     fun findFirstByCategoryOrderByPriceDesc(category: String): ProductEntity?
+    fun findFirstByBrandIdAndCategoryOrderByPriceAsc(brandId: Long, category: String): ProductEntity?
 }
