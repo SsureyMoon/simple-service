@@ -1,9 +1,11 @@
 package com.simple.api.integration
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.simple.api.SimpleServiceApplication
 import com.simple.api.dto.LowestHighestPricedProductsResponse
 import com.simple.api.dto.LowestPricedBrandPackageResponse
+import com.simple.api.dto.LowestPricedProductsResponse
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.extensions.spring.SpringExtension
 import io.kotest.matchers.shouldBe
@@ -23,8 +25,107 @@ class ProductControllerIntegrationTest : FunSpec() {
 
     @Autowired
     lateinit var restTemplate: TestRestTemplate
-    val objectMapper = ObjectMapper()
+    val objectMapper = ObjectMapper().registerKotlinModule()
+
     init {
+
+        test(
+            "GET /api/products/lowest-price " +
+                "should return lowest priced products of each categories",
+        ) {
+            val response = restTemplate.getForEntity(
+                "/api/products/lowest-price",
+                LowestPricedProductsResponse::class.java,
+            )
+
+            response.statusCode shouldBe HttpStatus.OK
+
+            val expectedResponseBody = objectMapper.readValue(
+                """
+                {
+                    "products": [
+                        {
+                            "id": 17,
+                            "brand": {
+                                "id": 3,
+                                "name": "C"
+                            },
+                            "category": "상의",
+                            "price": "10,000"
+                        },
+                        {
+                            "id": 34,
+                            "brand": {
+                                "id": 5,
+                                "name": "E"
+                            },
+                            "category": "아우터",
+                            "price": "5,000"
+                        },
+                        {
+                            "id": 27,
+                            "brand": {
+                                "id": 4,
+                                "name": "D"
+                            },
+                            "category": "바지",
+                            "price": "3,000"
+                        },
+                        {
+                            "id": 4,
+                            "brand": {
+                                "id": 1,
+                                "name": "A"
+                            },
+                            "category": "스니커즈",
+                            "price": "9,000"
+                        },
+                        {
+                            "id": 5,
+                            "brand": {
+                                "id": 1,
+                                "name": "A"
+                            },
+                            "category": "가방",
+                            "price": "2,000"
+                        },
+                        {
+                            "id": 30,
+                            "brand": {
+                                "id": 4,
+                                "name": "D"
+                            },
+                            "category": "모자",
+                            "price": "1,500"
+                        },
+                        {
+                            "id": 71,
+                            "brand": {
+                                "id": 9,
+                                "name": "I"
+                            },
+                            "category": "양말",
+                            "price": "1,700"
+                        },
+                        {
+                            "id": 48,
+                            "brand": {
+                                "id": 6,
+                                "name": "F"
+                            },
+                            "category": "액세서리",
+                            "price": "1,900"
+                        }
+                    ],
+                    "totalPrice": "34,100"
+                }
+                """.trimIndent(),
+                LowestPricedProductsResponse::class.java,
+            )
+
+            response.body shouldBe expectedResponseBody
+        }
+
         test(
             "GET /api/products/lowest-priced-brand-package " +
                 "should return lowest total priced brand package",

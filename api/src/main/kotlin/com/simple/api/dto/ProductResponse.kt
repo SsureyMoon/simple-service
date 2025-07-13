@@ -1,6 +1,7 @@
 package com.simple.api.dto
 
 import com.simple.domain.model.Product
+import com.simple.domain.support.toFormattedPrice
 import io.swagger.v3.oas.annotations.media.Schema
 
 @Schema(description = "상품 응답")
@@ -14,8 +15,8 @@ data class ProductResponse(
     @Schema(description = "카테고리", example = "상의")
     val category: String,
 
-    @Schema(description = "가격", example = "10000")
-    val price: Long,
+    @Schema(description = "가격", example = "10,000")
+    val price: String,
 ) {
     companion object {
         fun from(product: Product): ProductResponse {
@@ -23,7 +24,7 @@ data class ProductResponse(
                 id = product.id,
                 brand = BrandResponse.from(product.brand),
                 category = product.category,
-                price = product.price,
+                price = product.price.toFormattedPrice(),
             )
         }
     }
