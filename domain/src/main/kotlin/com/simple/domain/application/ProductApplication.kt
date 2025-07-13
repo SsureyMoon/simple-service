@@ -58,7 +58,6 @@ class ProductApplication(
     }
 
     fun updateProduct(id: Long, brandId: Long, category: String, price: Long): Product {
-        // 기존 상품 정보 조회 (브랜드 정보 필요)
         val oldProduct = productService.get(id)
         val oldBrandId = oldProduct.brand.id
 
@@ -72,7 +71,6 @@ class ProductApplication(
         return updatedProduct
     }
 
-    @Transactional
     fun deleteProduct(id: Long) {
         val product = productService.get(id)
         val brandId = product.brand.id
@@ -81,10 +79,26 @@ class ProductApplication(
         eventPublisher.publishEvent(BrandUpdatedEvent(brandId))
     }
 
-    @Transactional
     fun deleteBrand(brandId: Long) {
         brandService.delete(brandId)
         eventPublisher.publishEvent(BrandDeletedEvent(brandId))
+    }
+
+    fun calculateBrandTotalPrices(): Map<Long, Long> {
+        val brands = brandService.getAllBrands()
+
+        return brands.mapNotNull { brand ->
+            try {
+                val lowestProducts = productService.getLowestPricedProductsByBrand(brand.id)
+                if (lowestProducts.isEmpty()) {
+                    null
+                } else {
+                    Pair(brand.id, lowestProducts.sumOf { it.price })
+                }
+            } catch (_: NoSuchElementException) {
+                null
+            }
+        }.associate { it }
     }
 
     data class LowestPricedProducts(
