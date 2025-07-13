@@ -7,6 +7,10 @@ import io.swagger.v3.oas.annotations.media.Schema
 
 @Schema(description = "최저가, 최고가 상품 리스트 응답")
 data class LowestHighestPricedProductsResponse(
+    @Schema(description = "카테고리")
+    @JsonProperty("카테고리")
+    val category: String,
+
     @Schema(description = "최저가 상품", implementation = SimpleProduct::class)
     @JsonProperty("최저가")
     val lowestSimpleProducts: List<SimpleProduct>,
@@ -25,8 +29,12 @@ data class LowestHighestPricedProductsResponse(
     )
 
     companion object {
-        fun from(lowestHighestPricedProducts: LowestHighestPricedProducts): LowestHighestPricedProductsResponse {
+        fun from(
+            lowestHighestPricedProducts: LowestHighestPricedProducts,
+            category: String,
+        ): LowestHighestPricedProductsResponse {
             return LowestHighestPricedProductsResponse(
+                category = category,
                 lowestSimpleProducts = lowestHighestPricedProducts.lowestProducts.map {
                     SimpleProduct(
                         brandName = it.brand.name,

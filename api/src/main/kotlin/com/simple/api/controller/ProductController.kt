@@ -125,6 +125,7 @@ class ProductController(
         return ResponseEntity.ok(
             LowestHighestPricedProductsResponse.from(
                 productApplication.getLowestHighestPricedProducts(category),
+                category,
             ),
         )
     }

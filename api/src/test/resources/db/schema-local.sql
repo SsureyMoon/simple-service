@@ -1,0 +1,13 @@
+CREATE TABLE IF NOT EXISTS brands (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL UNIQUE
+);
+
+CREATE TABLE IF NOT EXISTS products (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    brand_id BIGINT NOT NULL,
+    category VARCHAR(255) NOT NULL,
+    price BIGINT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_category_price ON products (category, price);
