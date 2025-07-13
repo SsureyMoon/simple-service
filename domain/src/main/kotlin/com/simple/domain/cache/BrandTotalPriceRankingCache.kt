@@ -54,6 +54,11 @@ class BrandTotalPriceRankingCache {
         }
     }
 
+    fun clear() = lock.write {
+        rankingMap.clear()
+        brandTotalMap.clear()
+    }
+
     data class TotalPricedBrand(
         val brandId: Long,
         val totalPrice: Long,
