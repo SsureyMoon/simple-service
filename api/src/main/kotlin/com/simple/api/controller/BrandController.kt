@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @Tag(name = "Brand", description = "브랜드 관리 API")
 @RestController
-@RequestMapping("/api/brands")
+@RequestMapping("/api/brands", produces = ["application/json"], consumes = ["application/json"])
 class BrandController(
     private val brandService: BrandService,
     private val productApplication: ProductApplication,

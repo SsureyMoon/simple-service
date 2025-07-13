@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @Tag(name = "Product", description = "상품 관리 API")
 @RestController
-@RequestMapping("/api/products")
+@RequestMapping("/api/products", produces = ["application/json"])
 class ProductController(
     private val productApplication: ProductApplication,
 ) {
@@ -37,7 +37,7 @@ class ProductController(
         ApiResponse(responseCode = "201", description = "생성 성공"),
         ApiResponse(responseCode = "400", description = "잘못된 요청"),
     )
-    @PostMapping
+    @PostMapping(consumes = ["application/json"])
     fun create(
         @io.swagger.v3.oas.annotations.parameters.RequestBody(
             description = "상품 생성 요청",
@@ -61,7 +61,7 @@ class ProductController(
         ApiResponse(responseCode = "404", description = "상품을 찾을 수 없음"),
         ApiResponse(responseCode = "400", description = "잘못된 요청"),
     )
-    @PutMapping("/{id}")
+    @PutMapping("/{id}", consumes = ["application/json"])
     fun update(
         @Parameter(description = "상품 ID", example = "1")
         @PathVariable id: Long,
